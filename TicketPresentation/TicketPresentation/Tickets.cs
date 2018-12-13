@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TicketPresentation
 {
-    class Tickets
+    public class Tickets
     {
         public int StudentID { get; set; }
         public int OrderNumber { get; set; }
@@ -12,9 +12,9 @@ namespace TicketPresentation
         public int Price { get; set; }
         public int Quantity { get; set; }
         public bool Availability { get; set; }
-        public char Event { get; set; }
-        public int Time { get; set; }
-        public int Date { get; set; }
-
+        public string EventName { get; set; }
+        public DateTime EventTime { get; set; }
+        public DateTime EventDate { get; set; }
+        public string EventLocation { get; set; }
     }
 }

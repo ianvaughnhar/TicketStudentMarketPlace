@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
-namespace Demo
+namespace TicketPresentation
 {
     public class Function
     {
@@ -31,10 +31,10 @@ namespace Demo
 
             if (requestType == typeof(LaunchRequest))
             {
-                return BodyResponse("Welcome to the Student Ticket Marketplace, what would you like to do here!", false);
+                return BodyResponse("Welcome to the Student Ticket Marketplace, what would you like to do here?", false);
             }
 
-            else if (requestType == typeof(IntentRequest))
+            if (requestType == typeof(IntentRequest))
             {
                 //outputText += "Request type is Intent";
                 var intent = input.Request as IntentRequest;
@@ -49,20 +49,20 @@ namespace Demo
                         return BodyResponse("I did not understand the event name of the ticket, please try again.", false);
                     }
 
-                    else if (EventDate == null)
-                    {
-                        return BodyResponse("I did not understand the event date of the ticket you wanted, please try again.", false);
-                    }
+                    //else if (EventDate == null)
+                    //{
+                    //    return BodyResponse("I did not understand the event date of the ticket you wanted, please try again.", false);
+                    //}
 
-                    var TicketInfo = await GetTicketInfo(EventName, EventDate, context);
+                    Tickets tix = await GetTicketInfo(EventName, EventDate, context);
                     {
-                        outputText = $"The price for the{Tickets.EventName} ticket on {Tickets.EventDate.ToString()} is {Tickets.Price}";
+                        outputText = $"The price for the{tix.EventName} ticket on {tix.TimeDate.ToString()} is {tix.Price}";
 
                         return BodyResponse(outputText, true);
                     }
                 }
 
-                if (intent.Intent.Name.Equals("Sell_Intent"))
+                else if (intent.Intent.Name.Equals("Sell_Intent"))
                 {
                     var EventName = intent.Intent.Slots["EventName"].Value;
                     var EventDate = intent.Intent.Slots["EventDate"].Value;
@@ -72,45 +72,47 @@ namespace Demo
                         return BodyResponse("I did not understand the event name of the ticket, please try again.", false);
                     }
 
-                    else if (EventDate == null)
+                    //else if (EventDate == null)
+                    //{
+                    //    return BodyResponse("I did not understand the event date of the ticket you wanted, please try again.", false);
+                    //}
+                    
+                
+                else if (intent.Intent.Name.Equals("Price_Intent"))
+                {
+                    //var EventName = intent.Intent.Slots["EventName"].Value;
+                    //var EventDate = intent.Intent.Slots["EventDate"].Value;
+
+                    if (EventName == null)
                     {
-                        return BodyResponse("I did not understand the event date of the ticket you wanted, please try again.", false);
+                        return BodyResponse("I did not understand the event name of the ticket, please try again.", false);
                     }
 
-                    if (intent.Intent.Name.Equals("Price_Intent"))
+                    //else if (EventDate == null)
+                    //{
+                    //    return BodyResponse("I did not understand the event date of the ticket you wanted, please try again.", false);
+                    //}
+                    else if (intent.Intent.Name.Equals("AMAZON.StopIntent"))
                     {
-                        var EventName = intent.Intent.Slots["EventName"].Value;
-                        var EventDate = intent.Intent.Slots["EventDate"].Value;
 
-                        if (EventName == null)
-                        {
-                            return BodyResponse("I did not understand the event name of the ticket, please try again.", false);
-                        }
-
-                        else if (EventDate == null)
-                        {
-                            return BodyResponse("I did not understand the event date of the ticket you wanted, please try again.", false);
-                        }
-                        else if (intent.Intent.Name.Equals("AMAZON.StopIntent"))
-                        {
-
-                            return BodyResponse("You have now exited the Student Ticket MarketPlace", true);
-                        }
-
-                        else
-                        {
-                            return BodyResponse("I did not understand this intent, please try again", true);
-                        }
+                        return BodyResponse("You have now exited the Student Ticket MarketPlace", true);
                     }
 
                     else
                     {
-                        return BodyResponse("I did not understand your request, please try again", true);
+                        return BodyResponse("I did not understand this intent, please try again", true);
                     }
 
-
                 }
+
+                else
+                {
+                    return BodyResponse("I did not understand your request, please try again", true);
+                }
+                }
+               
             }
+            return BodyResponse("", true);
         }
 
         private SkillResponse BodyResponse(string outputSpeech, bool shouldEndSession, string repromptText = "Just say, tell me average ticket price.")
@@ -135,9 +137,9 @@ namespace Demo
         }
 
 
-        public async Task<Tickets> GetPlayerInfo(object EventName, object EventDate, ILambdaContext context)
+        private async Task<TicketPresentation.Tickets> GetTicketInfo(object EventName, object EventDate, ILambdaContext context)
         {
-            Tickets ticket = new Tickets();
+            Tickets tickets = new Tickets();
             var uri = new Uri($"http://www.oumisprojects.com/mis3033/api/Marketplace_Table");
 
             try
@@ -147,7 +149,7 @@ namespace Demo
                 context.Logger.LogLine($"Response from URL:\n{response}");
                 // TODO: (PMO) Handle bad requests
                 //Conver the below from the JSON output into a list of player objects
-                ticket = JsonConvert.DeserializeObject<Player>(response);
+                tickets = JsonConvert.DeserializeObject<Tickets>(response);
             }
             catch (Exception ex)
             {
@@ -155,7 +157,7 @@ namespace Demo
                 context.Logger.LogLine($"\nStack Trace: {ex.StackTrace}");
             }
 
-            return ticket;
+            return tickets;
         }
 
     }
