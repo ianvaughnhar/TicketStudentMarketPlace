@@ -110,56 +110,52 @@ namespace Demo
 
 
                 }
+            }
+        }
 
-                private SkillResponse BodyResponse(string outputSpeech,
-                bool shouldEndSession,
-                string repromptText = "Just say, tell me average ticket price.")
-                {
-                    var response = new ResponseBody
-                    {
-                        ShouldEndSession = shouldEndSession,
-                        OutputSpeech = new PlainTextOutputSpeech { Text = outputSpeech }
-                    };
+        private SkillResponse BodyResponse(string outputSpeech, bool shouldEndSession, string repromptText = "Just say, tell me average ticket price.")
+        {
+            var response = new ResponseBody
+            {
+                ShouldEndSession = shouldEndSession,
+                OutputSpeech = new PlainTextOutputSpeech { Text = outputSpeech }
+            };
 
-                    if (repromptText != null)
-                    {
-                        response.Reprompt = new Reprompt() { OutputSpeech = new PlainTextOutputSpeech() { Text = repromptText } };
-                    }
-
-                    var skillResponse = new SkillResponse
-                    {
-                        Response = response,
-                        Version = "1.0"
-                    };
-                    return skillResponse;
-                }
-
-
-                public async Task<Tickets> GetPlayerInfo(object EventName, object EventDate, ILambdaContext context)
-                {
-                    Tickets ticket = new Tickets();
-                    var uri = new Uri($"http://www.oumisprojects.com/mis3033/api/Marketplace_Table");
-
-                    try
-                    {
-                        //This is the actual GET request
-                        var response = await httpClient.GetStringAsync(uri);
-                        context.Logger.LogLine($"Response from URL:\n{response}");
-                        // TODO: (PMO) Handle bad requests
-                        //Conver the below from the JSON output into a list of player objects
-                        ticket = JsonConvert.DeserializeObject<Player>(response);
-                    }
-                    catch (Exception ex)
-                    {
-                        context.Logger.LogLine($"\nException: {ex.Message}");
-                        context.Logger.LogLine($"\nStack Trace: {ex.StackTrace}");
-                    }
-
-                    return ticket;
-                }
-
+            if (repromptText != null)
+            {
+                response.Reprompt = new Reprompt() { OutputSpeech = new PlainTextOutputSpeech() { Text = repromptText } };
             }
 
+            var skillResponse = new SkillResponse
+            {
+                Response = response,
+                Version = "1.0"
+            };
+            return skillResponse;
+        }
+
+
+        public async Task<Tickets> GetPlayerInfo(object EventName, object EventDate, ILambdaContext context)
+        {
+            Tickets ticket = new Tickets();
+            var uri = new Uri($"http://www.oumisprojects.com/mis3033/api/Marketplace_Table");
+
+            try
+            {
+                //This is the actual GET request
+                var response = await httpClient.GetStringAsync(uri);
+                context.Logger.LogLine($"Response from URL:\n{response}");
+                // TODO: (PMO) Handle bad requests
+                //Conver the below from the JSON output into a list of player objects
+                ticket = JsonConvert.DeserializeObject<Player>(response);
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogLine($"\nException: {ex.Message}");
+                context.Logger.LogLine($"\nStack Trace: {ex.StackTrace}");
+            }
+
+            return ticket;
         }
 
     }
