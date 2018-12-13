@@ -56,7 +56,7 @@ namespace TicketPresentation
 
                     Tickets tix = await GetTicketInfo(EventName, EventDate, context);
                     {
-                        outputText = $"The price for the{tix.EventName} ticket on {tix.TimeDate.ToString()} is {tix.Price}";
+                        outputText = $"No, there are {tix.Quantity} tickets for the next {tix.EventName} game";
 
                         return BodyResponse(outputText, true);
                     }
